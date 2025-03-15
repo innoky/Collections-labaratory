@@ -1,19 +1,34 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g 
+LDFLAGS = -mconsole
 
-SRCS = main.c matrix.c complex.c
-HEADERS = matrix.h complex.h DataType.h
+SRC_DIR = src
+TEST_DIR = tests
+UNITY_DIR = tests\unity
 
-TARGET = main
-all: $(TARGET)
+SRC = $(SRC_DIR)\main.c $(SRC_DIR)\matrix.c $(SRC_DIR)\MyComplex.c 
+OBJ = $(SRC:.c=.o)
 
-$(TARGET): $(SRCS) $(HEADERS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
+TEST_SRC = $(TEST_DIR)\UnitTests.c $(UNITY_DIR)\unity.c
+TEST_OBJ = $(TEST_SRC:.c=.o)
+TEST_EXEC = $(TEST_DIR)\UnitTests.exe
 
-clean:
-	rm -f $(TARGET) *.o
+TARGET = main.exe
 
-%.o: %.c $(HEADERS)
+
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET) $(LDFLAGS)
+
+
+$(TEST_EXEC): $(filter-out $(SRC_DIR)\main.o, $(OBJ)) $(TEST_OBJ)
+	$(CC) $(filter-out $(SRC_DIR)\main.o, $(OBJ)) $(TEST_OBJ) -o $(TEST_EXEC) $(LDFLAGS)
+
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: all clean
+clean:
+	@if exist $(SRC_DIR)\main.o del $(SRC_DIR)\main.o
+	@if exist $(SRC_DIR)\matrix.o del  $(SRC_DIR)\matrix.o
+	@if exist $(SRC_DIR)\MyComplex.o del $(SRC_DIR)\MyComplex.o
+	@if exist $(TEST_DIR)\UnitTests.o del $(TEST_DIR)\UnitTests.o
+	@if exist $(UNITY_DIR)\unity.o del $(UNITY_DIR)\unity.o
