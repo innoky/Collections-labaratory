@@ -11,6 +11,7 @@ Collections labaratory - это библиотека для работы с ма
 - [Функции](#функции)
 - [Макросы](#макросы)
 - [Примеры](#примеры)
+- [Тесты](#тесты)
 - [Сборка](#сборка)
 - [Лицензия](#лицензия)
 
@@ -152,10 +153,36 @@ int main() {
     return 0;
 }
 ```
+## Тесты
+_Под данную библиотеку написаны Unit тесты на базе среды тестирования [Unity](https://github.com/ThrowTheSwitch/Unity):_
+```c
+void test_matrix_sum_int() ...;
+void test_matrix_sum_float() ...;
+void test_matrix_sum_complex() ...;
+
+void test_matrix_mul_int() ...;
+void test_matrix_mul_float() ...;
+void test_matrix_mul_complex() ...;
+
+void test_matrix_transpose_int() ...;
+void test_matrix_transpose_float() ...;
+void test_matrix_transpose_complex() ...;
+
+void test_matrix_add_linnear_comb_int() ...;
+void test_matrix_add_linnear_comb_float() ...;
+void test_matrix_add_linnear_comb_complex() ...;
+```
 ## Сборка
-Для сборки проекта используйте Makefile. Выполните команду:
+Для сборки main файла с примерами использования используйте Makefile. Выполните команду и запустите:
 ```bash
-make
+make main.exe
+./main
+```
+Для сборки Unit тестов используйте Makefile. Выполните команду и запустите:
+```bash
+make tests\UnitTests.exe
+cd tests
+./UnitTests
 ```
 Для очистки скомпилированных файлов:
 ```bash
