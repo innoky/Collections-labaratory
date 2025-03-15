@@ -9,6 +9,7 @@ Collections labaratory - это библиотека для работы с ма
 - [Установка](#установка)
 - [Использование](#использование)
 - [Функции](#функции)
+- [Макросы](#макросы)
 - [Примеры](#примеры)
 - [Сборка](#сборка)
 - [Лицензия](#лицензия)
@@ -23,10 +24,10 @@ cd LabaMatrix
 ```
 
 ## Использование
-Подключите заголовочные файлы matrix.h и complex.h в вашем проекте:
+Подключите заголовочные файлы matrix.h и MyComplex.h в вашем проекте:
 ```c
 #include "matrix.h"
-#include "complex.h"
+#include "MyComplex.h"
 ```
 ## Функции
 __Создание матрицы__
@@ -51,7 +52,7 @@ matrix_t* matrix_mul(matrix_t *a, matrix_t *b);
 ```
 __Транспонирование матрицы__
 ```c
-matrix_t* transpose(matrix_t *m);
+matrix_t* matrix_transpose(matrix_t *m);
 ```
 __Добавление линейной комбинации строк__
 ```c
@@ -62,52 +63,89 @@ __Уничтожение матрицы__
 void matrix_destroy(matrix_t *m);
 ```
 __Печать матрицы__
-```
+```c
 void matrix_print(matrix_t *m, short int BPrint);
 ```
+
+## Макросы
+_Библиотека поддерживает несколько удобных макросов._<br><br>
+__=== СОЗДАНИЕ МАТРИЦЫ ===__
+<br>
+```c
+MATRIX(name, rows, cols, type)
+```
+Создание новой матрицы размером _rows * cols_ типа _type_ с именем _name_
+<br><br>
+__=== ЗАПОЛНЕНИЕ МАТРИЦЫ ===__
+```c
+MFILL(name, value, type)
+```
+Заполнение матрицы с именем _name_ значением _value_ с указанным типом _type_
+<br><br>
+__=== УСТАНОВКА ЗНАЧЕНИЯ ===__
+```c
+MSET(name, row, col, value)
+```
+Установка значения в матрицу _name_ по указанной строке _row_ и столбцу _col_ значением _value_
+<br><br>
+__=== СОЗДАНИЕ КОМПЛЕКСНОГО ЧИСЛА ===__
+```c
+COMPLEX(name, real, img)
+```
+Создание комплексного числа _name_ с действительной частью _real_ и мнимой частью _img_
+<br><br>
+__=== ВЫВОД МАТРИЦЫ ===__
+```c
+MPRINT(matrix, BPrint)
+```
+Вывод матрицы _matrix_ в терминал. Аргумент BPrint принимает либо нуль, либо единицу. При аргументе _0_ происходит обычный вывод матрицы, при _1_ - стилизованный боковыми скобками.
+<br><br>
 ## Примеры
 Пример использования библиотеки:
 ```c
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "DataType.h"
 #include "matrix.h"
-#include "complex.h"
+#include "MyComplex.h"
+
 
 int main() {
-    // Matrix creation
-    MATRIX(m1, 3, 4, complex);
-    MATRIX(m2, 3, 4, complex);
-    MATRIX(m3, 4, 3, complex);
+    // // Matrix creation
+    MATRIX(m1, 3, 4, cmp);
+    MATRIX(m2, 3, 4, cmp);
+    MATRIX(m3, 4, 3, cmp);
 
-    // Matrix filling / setting (with Complex) and printing
-    Complex(c1, 3.3, 4);
-    Complex(c_f, 45.3, 2.4);
-    matrix_fill(m1, c1, 2);
-    matrix_set(m1, 1, 3, c_f);
+    // Matrix filling / setting (with COMPLEX) and printing
+    COMPLEX(c1, 3.3, 4);
+    COMPLEX(c_f, 45.3, 2.4);
+    MFILL(m1, c1, cmp);
+    MSET(m1,1,3,c_f);
     printf("Filled matrix:\n");
     matrix_print(m1, 0);
 
     // Matrix summation and printing
-    Complex(c2, 3, 4);
-    matrix_fill(m2, c2, 2);
+    COMPLEX(c2, 3, 4);
+    MFILL(m2, c2, cmp);
     matrix_t* sum_matrix = matrix_sum(m1, m2);
     printf("Summed matrices:\n");
     matrix_print(sum_matrix, 0);
 
-    // Matrix multiply and printing
-    Complex(c3, 5, 2);
-    matrix_fill(m3, c3, 2);
+    //Matrix muliply and printing
+    COMPLEX(c3, 5, 2);
+    MFILL(m3, c3, cmp);
     matrix_t* mul_matrix = matrix_mul(sum_matrix, m3);
     printf("Multiplied matrices:\n");
     matrix_print(mul_matrix, 0);
 
-    // Matrix transpose and printing
-    matrix_t* trans_matrix = transpose(mul_matrix);
+    //Matrix transpose and printing
+    matrix_t* trans_matrix = matrix_transpose(mul_matrix);
     printf("Transposed matrix:\n");
     matrix_print(trans_matrix, 1);
 
-    // Linear combination adding
-    Complex(coef, 5, 12);
+    //Linear combination adding
+    COMPLEX(coef, 5, 12);
     matrix_t* lin_added_matrix = add_linnear_comb(trans_matrix, 0, coef);
     matrix_print(lin_added_matrix, 0);
 
