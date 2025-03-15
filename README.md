@@ -65,7 +65,7 @@ void matrix_destroy(matrix_t *m);
 ```
 __Печать матрицы__
 ```c
-void matrix_print(matrix_t *m, short int BPrint);
+void matrix_print(matrix_t *m, short BPrint);
 ```
 
 ## Макросы
