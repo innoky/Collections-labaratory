@@ -178,7 +178,7 @@ void test_matrix_mul_complex()
 
     matrix_t *m3 = matrix_mul(m1, m2);
 
-    /* Проверим два элемента */
+    
     COMPLEX(expected_00, 26, 12);
     COMPLEX(expected_11, 72, 28);
 
