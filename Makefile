@@ -1,34 +1,26 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -g 
-LDFLAGS = -mconsole
+CFLAGS = -Wall -Wextra -g
 
 SRC_DIR = src
 TEST_DIR = tests
-UNITY_DIR = tests\unity
+UNITY_DIR = $(TEST_DIR)/unity
 
-SRC = $(SRC_DIR)\main.c $(SRC_DIR)\matrix.c $(SRC_DIR)\MyComplex.c 
-OBJ = $(SRC:.c=.o)
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/matrix.c $(SRC_DIR)/MyComplex.c $(SRC_DIR)/types.c
+HEADERS = $(SRC_DIR)/matrix.h $(SRC_DIR)/MyComplex.h $(SRC_DIR)/DataType.h $(SRC_DIR)/types.h
 
-TEST_SRC = $(TEST_DIR)\UnitTests.c $(UNITY_DIR)\unity.c
-TEST_OBJ = $(TEST_SRC:.c=.o)
-TEST_EXEC = $(TEST_DIR)\UnitTests.exe
+TARGET = main
+TEST_BIN = test
 
-TARGET = main.exe
+all: $(TARGET)
 
+$(TARGET): $(SRCS) $(HEADERS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
 
-$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $(TARGET) $(LDFLAGS)
-
-
-$(TEST_EXEC): $(filter-out $(SRC_DIR)\main.o, $(OBJ)) $(TEST_OBJ)
-	$(CC) $(filter-out $(SRC_DIR)\main.o, $(OBJ)) $(TEST_OBJ) -o $(TEST_EXEC) $(LDFLAGS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+test: $(TEST_DIR)/UnitTests.c $(SRC_DIR)/matrix.c $(SRC_DIR)/MyComplex.c $(SRC_DIR)/types.c $(UNITY_DIR)/unity.c
+	$(CC) $(CFLAGS) -o $(TEST_BIN) $^
+	./$(TEST_BIN)
 
 clean:
-	@if exist $(SRC_DIR)\main.o del $(SRC_DIR)\main.o
-	@if exist $(SRC_DIR)\matrix.o del  $(SRC_DIR)\matrix.o
-	@if exist $(SRC_DIR)\MyComplex.o del $(SRC_DIR)\MyComplex.o
-	@if exist $(TEST_DIR)\UnitTests.o del $(TEST_DIR)\UnitTests.o
-	@if exist $(UNITY_DIR)\unity.o del $(UNITY_DIR)\unity.o
+	rm -f $(TARGET) $(TEST_BIN) *.o
+
+.PHONY: all clean test

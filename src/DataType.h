@@ -1,14 +1,15 @@
-#include "matrix.h"
+#pragma once
 
-#define TYPE_TO_FLAG_int 0
-#define TYPE_TO_FLAG_float 1
-#define TYPE_TO_FLAG_cmp 2
+#include "types.h"
 
-#define TYPE_TO_FLAG(type) TYPE_TO_FLAG_##type
+#define MATRIX(name, r, c, type) matrix_t *name = matrix_create(r, c, get##type##FieldInfo())
+#define MFILL(matrix, val, type) matrix_fill(matrix, val, get##type##FieldInfo())
+#define MSET(matrix, i, j, val) matrix_set(matrix, i, j, val)
+#define MGET(matrix, i, j) matrix_get(matrix, i, j)
 
-#define MATRIX(name, rows, cols, type) matrix_t* name = matrix_create(rows, cols, TYPE_TO_FLAG(type))
-#define MFILL(name, value, type) matrix_fill(name, value, TYPE_TO_FLAG(type))
-#define MSET(name, row, col, value) matrix_set(name, row, col, value)
-#define COMPLEX(name, real, img) MyComplex* name = new_complex(real, img);
+#define INT(name, val) Int *name = integer(val)
+#define FLOAT(name, val) Float *name = float_(val)
+#define DOUBLE(name, val) Double *name = double_(val)
+#define COMPLEX(name, real, imag) MyComplex name = {real, imag}
 
-#define MPRINT(matrix, BPrint) matrix_print(matrix, BPrint)
+#define getcmpFieldInfo getComplexFieldInfo

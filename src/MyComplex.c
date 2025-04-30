@@ -1,40 +1,35 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "MyComplex.h"
+#include <math.h>
+#include <stdio.h>
 
-MyComplex* new_complex(float real, float img)
+MyComplex complex_add(MyComplex a, MyComplex b)
 {
-    MyComplex* c = (MyComplex*)malloc(sizeof(MyComplex));
-    c->real = real;
-    c->img = img;
-    return c;
+    MyComplex r = {a.real + b.real, a.imag + b.imag};
+    return r;
 }
 
-MyComplex* complex_add(MyComplex* a, MyComplex* b)
+MyComplex complex_sub(MyComplex a, MyComplex b)
 {
-    return new_complex(a->real + b->real, a->img + b->img);
+    MyComplex r = {a.real - b.real, a.imag - b.imag};
+    return r;
 }
 
-MyComplex* complex_mul(MyComplex* a, MyComplex* b)
+MyComplex complex_mul(MyComplex a, MyComplex b)
 {
-    return new_complex(a->real * b->real - a->img * b->img, a->real * b->img + a->img * b->real);
+    MyComplex r = {
+        a.real * b.real - a.imag * b.imag,
+        a.real * b.imag + a.imag * b.real};
+    return r;
 }
 
-int complex_equals(MyComplex *a, MyComplex *b)
+
+
+int complex_equals(MyComplex a, MyComplex b)
 {
-    if (a->real == b->real && a->img == b->img)
-    {
-        return 1;
-    }
-    return 0;
+    return fabs(a.real - b.real) < 1e-3f && fabs(a.imag - b.imag) < 1e-3f;
 }
 
-void complex_print(MyComplex* c)
+void complex_print(MyComplex c)
 {
-    printf(" %g + %gi ", c->real, c->img);
-}
-
-void complex_free(MyComplex* c)
-{
-    free(c);
+    printf("%g + %gi", c.real, c.imag);
 }
