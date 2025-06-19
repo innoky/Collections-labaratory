@@ -1,10 +1,23 @@
 #include "matrix.h"
-#include "types.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-matrix_t *matrix_create(int rows, int cols, FieldInfo *info)
+static void print_element(const DataTypeOperations *ops, const void *element) {
+    if (ops == &int_ops) {
+        printf("%d ", *(const int *)element);
+    } else if (ops == &double_ops) {
+        printf("%g ", *(const double *)element);
+    } else if (ops == &complex_ops) {
+        extern void complex_print(MyComplex c);
+        complex_print(*(const MyComplex *)element);
+        printf(" ");
+    } else {
+        printf("? ");
+    }
+}
+
+matrix_t *matrix_create(int rows, int cols, const DataTypeOperations *ops)
 {
     matrix_t *m = malloc(sizeof(matrix_t));
     if (!m)
@@ -12,12 +25,11 @@ matrix_t *matrix_create(int rows, int cols, FieldInfo *info)
 
     m->rows = rows;
     m->cols = cols;
-    m->info = info;
+    m->ops = ops;
 
     m->data = malloc(sizeof(void *) * rows);
-    for (int i = 0; i < rows; i++)
-    {
-        m->data[i] = calloc(cols, info->element_size);
+    for (int i = 0; i < rows; i++) {
+        m->data[i] = calloc(cols, ops->size);
     }
 
     return m;
@@ -25,25 +37,22 @@ matrix_t *matrix_create(int rows, int cols, FieldInfo *info)
 
 void matrix_destroy(matrix_t *m)
 {
-    for (int i = 0; i < m->rows; i++)
-    {
+    for (int i = 0; i < m->rows; i++) {
         free(m->data[i]);
     }
     free(m->data);
     free(m);
 }
 
-void matrix_print(matrix_t *m, short BPrint)
+void matrix_print(const matrix_t *m, short BPrint)
 {
     printf("Matrix %dx%d:\n", m->rows, m->cols);
-    for (int i = 0; i < m->rows; i++)
-    {
+    for (int i = 0; i < m->rows; i++) {
         if (BPrint)
             printf("|");
-        for (int j = 0; j < m->cols; j++)
-        {
-            void *element = (char *)m->data[i] + j * m->info->element_size;
-            m->info->toString(element);
+        for (int j = 0; j < m->cols; j++) {
+            void *element = (char *)m->data[i] + j * m->ops->size;
+            print_element(m->ops, element);
         }
         if (BPrint)
             printf("|");
@@ -51,82 +60,75 @@ void matrix_print(matrix_t *m, short BPrint)
     }
 }
 
-void matrix_set(matrix_t *m, int row, int col, void *value)
+void matrix_set(matrix_t *m, int row, int col, const void *value)
 {
-    void *target = (char *)m->data[row] + col * m->info->element_size;
-    memcpy(target, value, m->info->element_size);
+    void *target = (char *)m->data[row] + col * m->ops->size;
+    memcpy(target, value, m->ops->size);
 }
 
-void *matrix_get(matrix_t *m, int row, int col)
+void *matrix_get(const matrix_t *m, int row, int col)
 {
-    return (char *)m->data[row] + col * m->info->element_size;
+    return (char *)m->data[row] + col * m->ops->size;
 }
-void matrix_fill(matrix_t *m, void *value, FieldInfo *info)
+
+void matrix_fill(matrix_t *m, const void *value)
 {
-    if (m->info != info)
-    {
-        fprintf(stderr, "Type mismatch in matrix_fill\n");
-        exit(1);
-    }
     for (int i = 0; i < m->rows; i++)
         for (int j = 0; j < m->cols; j++)
             matrix_set(m, i, j, value);
 }
 
-matrix_t *matrix_sum(matrix_t *a, matrix_t *b)
+matrix_t *matrix_sum(const matrix_t *a, const matrix_t *b)
 {
-
-    matrix_t *res = matrix_create(a->rows, a->cols, a->info); 
-    for (int i = 0; i < a->rows; i++)
-    {
-        for (int j = 0; j < a->cols; j++)
-        {
+    if (a->rows != b->rows || a->cols != b->cols || a->ops != b->ops) {
+        fprintf(stderr, "Matrix sum: dimension/type mismatch\n");
+        return NULL;
+    }
+    matrix_t *res = matrix_create(a->rows, a->cols, a->ops);
+    void *tmp = malloc(a->ops->size);
+    for (int i = 0; i < a->rows; i++) {
+        for (int j = 0; j < a->cols; j++) {
             void *x = matrix_get(a, i, j);
             void *y = matrix_get(b, i, j);
-            void *r = sum(a->info, x, y);
-            matrix_set(res, i, j, r);
-            free(r);
+            a->ops->sum(x, y, tmp);
+            matrix_set(res, i, j, tmp);
         }
     }
+    free(tmp);
     return res;
 }
 
-matrix_t *matrix_mul(matrix_t *a, matrix_t *b)
+matrix_t *matrix_mul(const matrix_t *a, const matrix_t *b)
 {
-
-
-    matrix_t *res = matrix_create(a->rows, b->cols, a->info);
-
-    for (int i = 0; i < res->rows; i++)
-    {
-        for (int j = 0; j < res->cols; j++)
-        {
-            void *acc = Zero(a->info);
-            for (int k = 0; k < a->cols; k++)
-            {
+    if (a->cols != b->rows || a->ops != b->ops) {
+        fprintf(stderr, "Matrix mul: dimension/type mismatch\n");
+        return NULL;
+    }
+    matrix_t *res = matrix_create(a->rows, b->cols, a->ops);
+    void *acc = malloc(a->ops->size);
+    void *prod = malloc(a->ops->size);
+    for (int i = 0; i < res->rows; i++) {
+        for (int j = 0; j < res->cols; j++) {
+            memset(acc, 0, a->ops->size); // zero accumulator
+            for (int k = 0; k < a->cols; k++) {
                 void *x = matrix_get(a, i, k);
                 void *y = matrix_get(b, k, j);
-                void *prod = product(a->info, x, y);
-                void *new_acc = sum(a->info, acc, prod);
-                free(acc);
-                free(prod);
-                acc = new_acc;
+                a->ops->multiply(x, y, prod);
+                a->ops->sum(acc, prod, acc);
             }
             matrix_set(res, i, j, acc);
-            free(acc);
         }
     }
-
+    free(acc);
+    free(prod);
     return res;
 }
 
-matrix_t *matrix_transpose(matrix_t *m)
+matrix_t *matrix_transpose(const matrix_t *m)
 {
-    matrix_t *t = matrix_create(m->cols, m->rows, m->info); 
-    for (int i = 0; i < m->rows; i++)
-    {
-        for (int j = 0; j < m->cols; j++)
-        {
+    matrix_t *t = matrix_create(m->cols, m->rows, m->ops);
+    for (int i = 0; i < m->rows; i++) {
+        for (int j = 0; j < m->cols; j++) {
             void *val = matrix_get(m, i, j);
             matrix_set(t, j, i, val);
         }
@@ -134,33 +136,31 @@ matrix_t *matrix_transpose(matrix_t *m)
     return t;
 }
 
-matrix_t *add_linnear_comb(matrix_t *m, int row, void *coef)
+matrix_t *add_linnear_comb(const matrix_t *m, int row, const void *coef)
 {
-    matrix_t *res = matrix_create(m->rows, m->cols, m->info);
-
-    for (int i = 0; i < m->rows; i++)
-    {
-        for (int j = 0; j < m->cols; j++)
-        {
+    matrix_t *res = matrix_create(m->rows, m->cols, m->ops);
+    void *tmp = malloc(m->ops->size);
+    void *scaled = malloc(m->ops->size);
+    // Копируем исходную матрицу
+    for (int i = 0; i < m->rows; i++) {
+        for (int j = 0; j < m->cols; j++) {
             void *val = matrix_get(m, i, j);
             matrix_set(res, i, j, val);
         }
     }
-
-    for (int i = 0; i < m->rows; i++)
-    {
+    // Добавляем линейную комбинацию
+    for (int i = 0; i < m->rows; i++) {
         if (i == row)
             continue;
-        for (int j = 0; j < m->cols; j++)
-        {
+        for (int j = 0; j < m->cols; j++) {
             void *src = matrix_get(m, i, j);
-            void *scaled = product(m->info, src, coef);
+            m->ops->multiply(src, coef, scaled);
             void *dst = matrix_get(res, row, j);
-            void *updated = sum(m->info, dst, scaled);
-            matrix_set(res, row, j, updated);
-            free(scaled);
-            free(updated);
+            m->ops->sum(dst, scaled, tmp);
+            matrix_set(res, row, j, tmp);
         }
     }
+    free(tmp);
+    free(scaled);
     return res;
 }

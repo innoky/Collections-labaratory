@@ -7,28 +7,30 @@
 
 int main() {
     // Matrix creation
-    MATRIX(m1, 3, 4, cmp);
-    MATRIX(m2, 3, 4, cmp);
-    MATRIX(m3, 4, 3, cmp);
+    MATRIX(m1, 3, 4, complex_ops);
+    MATRIX(m2, 3, 4, complex_ops);
+    MATRIX(m3, 4, 3, complex_ops);
 
     // Matrix filling / setting (with COMPLEX) and printing
     COMPLEX(c1, 3.3, 4);
     COMPLEX(c_f, 45.3, 2.4);
-    MFILL(m1, &c1, cmp);
+
+    MFILL(m1, &c1);
+    
     MSET(m1, 1, 3, &c_f);
     printf("Filled matrix:\n");
     matrix_print(m1, 0);
 
     // Matrix summation and printing
     COMPLEX(c2, 3, 4);
-    MFILL(m2, &c2, cmp);
+    MFILL(m2, &c2);
     matrix_t* sum_matrix = matrix_sum(m1, m2);
     printf("Summed matrices:\n");
     matrix_print(sum_matrix, 0);
 
     // Matrix multiply and printing
     COMPLEX(c3, 5, 2);
-    MFILL(m3, &c3, cmp);
+    MFILL(m3, &c3);
     matrix_t* mul_matrix = matrix_mul(sum_matrix, m3);
     printf("Multiplied matrices:\n");
     matrix_print(mul_matrix, 0);

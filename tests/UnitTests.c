@@ -8,8 +8,8 @@ void tearDown() {}
 
 void test_matrix_sum_complex()
 {
-    MATRIX(m1, 2, 2, cmp);
-    MATRIX(m2, 2, 2, cmp);
+    MATRIX(m1, 2, 2, complex_ops);
+    MATRIX(m2, 2, 2, complex_ops);
 
     COMPLEX(c1, 3, 5);
     COMPLEX(c2, 5, 6);
@@ -39,8 +39,8 @@ void test_matrix_sum_complex()
 
 void test_matrix_mul_complex()
 {
-    MATRIX(m1, 2, 2, cmp);
-    MATRIX(m2, 2, 2, cmp);
+    MATRIX(m1, 2, 2, complex_ops);
+    MATRIX(m2, 2, 2, complex_ops);
 
     COMPLEX(c1, 1, 1);
     COMPLEX(c2, 2, 2);
@@ -80,7 +80,7 @@ void test_matrix_mul_complex()
 
 void test_matrix_transpose_complex()
 {
-    MATRIX(m1, 2, 2, cmp);
+    MATRIX(m1, 2, 2, complex_ops);
     COMPLEX(c1, 1, 1);
     COMPLEX(c2, 2, 2);
     COMPLEX(c3, 3, 3);
@@ -102,7 +102,7 @@ void test_matrix_transpose_complex()
 
 void test_matrix_add_linear_comb_complex()
 {
-    MATRIX(m, 2, 2, cmp);
+    MATRIX(m, 2, 2, complex_ops);
     COMPLEX(c1, 1, 1);
     COMPLEX(c2, 2, 2);
     COMPLEX(c3, 3, 3);

@@ -8,6 +8,8 @@ typedef struct
     float imag;
 } MyComplex;
 
+#define COMPLEX(name, re, im) MyComplex name = {re, im}
+
 MyComplex complex_add(MyComplex a, MyComplex b);
 MyComplex complex_sub(MyComplex a, MyComplex b);
 MyComplex complex_mul(MyComplex a, MyComplex b);
